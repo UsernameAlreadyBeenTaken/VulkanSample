@@ -38,8 +38,6 @@ else()
     endif()
 endif()
 
-add_definitions(-DVK_USE_PLATFORM_WIN32_KHR)
-
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     include_directories(${VULKAN_PATH}/Include)
     link_directories(${VULKAN_PATH}/Bin)

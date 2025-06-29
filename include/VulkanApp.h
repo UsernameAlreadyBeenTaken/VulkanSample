@@ -1,4 +1,4 @@
-#include <vulkan/vulkan.h>
+#include "VulkanFunctions.h"
 
 class VulkanApp
 {

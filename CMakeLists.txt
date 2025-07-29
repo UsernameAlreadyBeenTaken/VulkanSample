@@ -43,10 +43,12 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     link_directories(${VULKAN_PATH}/Bin)
 endif()
 
+add_definitions(-DVK_NO_PROTOTYPES)
+
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
-file(GLOB_RECURSE HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/include/*.*)
+file(GLOB_RECURSE HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/include/*.* ${CMAKE_CURRENT_SOURCE_DIR}/external/*.*)
 
 add_executable(${NAME} ${SOURCES} ${HEADERS})
 

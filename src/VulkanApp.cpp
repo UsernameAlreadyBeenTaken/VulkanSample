@@ -5,14 +5,29 @@ namespace VulkanSample
 
 bool VulkanApp::init()
 {
-    if (!loadVkLibrary(vkLibrary))
+    if (!loadVkLibrary(mVkLibrary))
         return false;
 
-    if (!loadFunctionFromVulkanLibrary(vkLibrary))
+    if (!loadFunctionFromVulkanLibrary(mVkLibrary))
         return false;
 
     if(!loadGlobalLevelFunctions())
         return false;
+
+    if (!createInstance({}, "VulkanSample", mInstance))
+        return false;
+
+    if (!loadInstanceLevelFunctions(mInstance, {}))
+        return false;
+
+    std::vector<VkPhysicalDevice> physicalDevices;
+    if (!enumerateAvailablePhysicalDevices(mInstance, physicalDevices))
+        return false;
+
+    for (auto &physicalDevice : physicalDevices)
+    {
+        
+    }
 
     return true;
 }

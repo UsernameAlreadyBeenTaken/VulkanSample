@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _COMMON_H_
+#define _COMMON_H_
 
 #include <iostream>
 #include <vector>
@@ -33,3 +34,4 @@ bool isExtensionSupported(std::vector<VkExtensionProperties> const &availableExt
 bool createInstance(std::vector<const char*> &desired_extensions, const char* const appName, VkInstance &instance);
 
 } // namespace VulkanSample
+#endif // _COMMON_H_

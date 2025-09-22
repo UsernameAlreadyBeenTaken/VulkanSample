@@ -12,7 +12,8 @@ public:
     bool init();
 
 private:
-    LIBRARY_TYPE vkLibrary;
+    LIBRARY_TYPE m_VkLibrary;
+    VkInstance   m_Instance;
 };
 
 } //namespace VulkanSample

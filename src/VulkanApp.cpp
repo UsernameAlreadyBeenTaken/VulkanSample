@@ -5,13 +5,19 @@ namespace VulkanSample
 
 bool VulkanApp::init()
 {
-    if (!loadVkLibrary(vkLibrary))
+    if (!loadVkLibrary(m_VkLibrary))
         return false;
 
-    if (!loadFunctionFromVulkanLibrary(vkLibrary))
+    if (!loadFunctionFromVulkanLibrary(m_VkLibrary))
         return false;
 
     if(!loadGlobalLevelFunctions())
+        return false;
+
+    if (!createInstance({}, "VulkanSample", m_Instance))
+        return false;
+
+    if (!loadInstanceLevelFunctions(m_Instance, {}))
         return false;
 
     return true;

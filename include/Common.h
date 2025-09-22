@@ -32,6 +32,7 @@ bool loadGlobalLevelFunctions();
 bool checkAvailableInstanceExtensions(std::vector<VkExtensionProperties> &availableExtensions);
 bool isExtensionSupported(std::vector<VkExtensionProperties> const &availableExtensions, const char* const extension);
 bool createInstance(std::vector<const char*> &desired_extensions, const char* const appName, VkInstance &instance);
+bool loadInstanceLevelFunctions(VkInstance &instance, std::vector<char const *> const & enabled_extensions);
 
 } // namespace VulkanSample
 #endif // _COMMON_H_

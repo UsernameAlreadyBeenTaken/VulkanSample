@@ -169,4 +169,50 @@ bool loadInstanceLevelFunctions(VkInstance &instance, std::vector<char const *> 
     return true;
 }
 
+bool enumerateAvailablePhysicalDevices(VkInstance &instance, std::vector<VkPhysicalDevice> &available_devices)
+{
+  uint32_t devices_count = 0;
+  VkResult result = VK_SUCCESS;
+
+  result = vkEnumeratePhysicalDevices(instance, &devices_count, nullptr);
+  if((result != VK_SUCCESS) || (devices_count == 0))
+  {
+    std::cout << "Could not get the number of available physical devices." << std::endl;
+    return false;
+  }
+
+  available_devices.resize(devices_count);
+  result = vkEnumeratePhysicalDevices(instance, &devices_count, available_devices.data());
+  if((result != VK_SUCCESS) || (devices_count == 0))
+  {
+    std::cout << "Could not enumerate physical devices." << std::endl;
+    return false;
+  }
+
+  return true;
+}
+
+bool checkAvailableDeviceExtensions(VkPhysicalDevice physical_device, std::vector<VkExtensionProperties> &available_extensions)
+{
+  uint32_t extensions_count = 0;
+  VkResult result = VK_SUCCESS;
+
+  result = vkEnumerateDeviceExtensionProperties(physical_device, nullptr, &extensions_count, nullptr);
+  if((result != VK_SUCCESS) || (extensions_count == 0))
+  {
+    std::cout << "Could not get the number of device extensions." << std::endl;
+    return false;
+  }
+
+  available_extensions.resize(extensions_count);
+  result = vkEnumerateDeviceExtensionProperties(physical_device, nullptr, &extensions_count, available_extensions.data());
+  if((result != VK_SUCCESS) || (extensions_count == 0))
+  {
+    std::cout << "Could not enumerate device extensions." << std::endl;
+    return false;
+  }
+
+  return true;
+}
+
 } // namespace VulkanSample

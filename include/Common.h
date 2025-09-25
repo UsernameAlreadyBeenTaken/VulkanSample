@@ -33,6 +33,8 @@ bool checkAvailableInstanceExtensions(std::vector<VkExtensionProperties> &availa
 bool isExtensionSupported(std::vector<VkExtensionProperties> const &availableExtensions, const char* const extension);
 bool createInstance(std::vector<const char*> &desired_extensions, const char* const appName, VkInstance &instance);
 bool loadInstanceLevelFunctions(VkInstance &instance, std::vector<char const *> const & enabled_extensions);
+bool enumerateAvailablePhysicalDevices(VkInstance &instance, std::vector<VkPhysicalDevice> &available_devices);
+bool checkAvailableDeviceExtensions(VkPhysicalDevice physical_device, std::vector<VkExtensionProperties> &available_extensions);
 
 } // namespace VulkanSample
 #endif // _COMMON_H_

@@ -20,6 +20,8 @@ bool VulkanApp::init()
     if (!loadInstanceLevelFunctions(m_Instance, {}))
         return false;
 
+    // enumerate phys devices + check their extensions
+
     return true;
 }
 

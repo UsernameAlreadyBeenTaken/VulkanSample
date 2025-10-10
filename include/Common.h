@@ -1,5 +1,4 @@
-#ifndef _COMMON_H_
-#define _COMMON_H_
+#pragma once
 
 #include <iostream>
 #include <vector>
@@ -37,4 +36,3 @@ bool enumerateAvailablePhysicalDevices(VkInstance &instance, std::vector<VkPhysi
 bool checkAvailableDeviceExtensions(VkPhysicalDevice physical_device, std::vector<VkExtensionProperties> &available_extensions);
 
 } // namespace VulkanSample
-#endif // _COMMON_H_

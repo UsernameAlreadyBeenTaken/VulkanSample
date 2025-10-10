@@ -5,19 +5,19 @@ namespace VulkanSample
 
 bool VulkanApp::init()
 {
-    if (!loadVkLibrary(m_VkLibrary))
+    if (!loadVkLibrary(mVkLibrary))
         return false;
 
-    if (!loadFunctionFromVulkanLibrary(m_VkLibrary))
+    if (!loadFunctionFromVulkanLibrary(mVkLibrary))
         return false;
 
     if(!loadGlobalLevelFunctions())
         return false;
 
-    if (!createInstance({}, "VulkanSample", m_Instance))
+    if (!createInstance({}, "VulkanSample", mInstance))
         return false;
 
-    if (!loadInstanceLevelFunctions(m_Instance, {}))
+    if (!loadInstanceLevelFunctions(mInstance, {}))
         return false;
 
     // enumerate phys devices + check their extensions

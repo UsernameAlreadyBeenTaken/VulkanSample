@@ -1,5 +1,4 @@
-#ifndef _VULKAN_APP_H_
-#define _VULKAN_APP_H_
+#pragma once
 
 #include "Common.h"
 
@@ -12,9 +11,8 @@ public:
     bool init();
 
 private:
-    LIBRARY_TYPE m_VkLibrary;
-    VkInstance   m_Instance;
+    LIBRARY_TYPE mVkLibrary;
+    VkInstance   mInstance;
 };
 
 } //namespace VulkanSample
-#endif // _VULKAN_APP_H_

@@ -20,7 +20,9 @@ bool VulkanApp::init()
     if (!loadInstanceLevelFunctions(mInstance, {}))
         return false;
 
-    // enumerate phys devices + check their extensions
+    std::vector<VkPhysicalDevice> physicalDevices;
+    if (!enumerateAvailablePhysicalDevices(mInstance, physicalDevices))
+        return false;
 
     return true;
 }

@@ -136,7 +136,7 @@ bool createInstance(std::vector<const char*> &desiredExtensions, const char* con
    return true;
 }
 
-bool loadInstanceLevelFunctions(VkInstance &instance, std::vector<char const *> const & enabled_extensions)
+bool loadInstanceLevelFunctions(VkInstance &instance, std::vector<char const *> const & enabledExtensions)
 {
 // Load core Vulkan API instance-level functions
 #define INSTANCE_LEVEL_VULKAN_FUNCTION(name)                                  \
@@ -150,9 +150,9 @@ bool loadInstanceLevelFunctions(VkInstance &instance, std::vector<char const *> 
 
 // Load instance-level functions from enabled extensions
 #define INSTANCE_LEVEL_VULKAN_FUNCTION_FROM_EXTENSION(name, extension)         \
-    for(auto &enabled_extension : enabled_extensions)                          \
+    for(auto &enabledExtension : enabledExtensions)                          \
     {                                                                          \
-      if(std::string(enabled_extension) == std::string(extension))             \
+      if(std::string(enabledExtension) == std::string(extension))             \
       {                                                                        \
         name = (PFN_##name)vkGetInstanceProcAddr( instance, #name );           \
         if(name == nullptr)                                                    \
@@ -169,7 +169,7 @@ bool loadInstanceLevelFunctions(VkInstance &instance, std::vector<char const *> 
     return true;
 }
 
-bool enumerateAvailablePhysicalDevices(VkInstance &instance, std::vector<VkPhysicalDevice> &available_devices)
+bool enumerateAvailablePhysicalDevices(VkInstance &instance, std::vector<VkPhysicalDevice> &availableDevices)
 {
   uint32_t devices_count = 0;
   VkResult result = VK_SUCCESS;
@@ -181,8 +181,8 @@ bool enumerateAvailablePhysicalDevices(VkInstance &instance, std::vector<VkPhysi
     return false;
   }
 
-  available_devices.resize(devices_count);
-  result = vkEnumeratePhysicalDevices(instance, &devices_count, available_devices.data());
+  availableDevices.resize(devices_count);
+  result = vkEnumeratePhysicalDevices(instance, &devices_count, availableDevices.data());
   if((result != VK_SUCCESS) || (devices_count == 0))
   {
     std::cout << "Could not enumerate physical devices." << std::endl;
@@ -192,27 +192,34 @@ bool enumerateAvailablePhysicalDevices(VkInstance &instance, std::vector<VkPhysi
   return true;
 }
 
-bool checkAvailableDeviceExtensions(VkPhysicalDevice physical_device, std::vector<VkExtensionProperties> &available_extensions)
+bool checkAvailableDeviceExtensions(VkPhysicalDevice physicalDevice, std::vector<VkExtensionProperties> &availableExtensions)
 {
-  uint32_t extensions_count = 0;
+  uint32_t extensionsCount = 0;
   VkResult result = VK_SUCCESS;
 
-  result = vkEnumerateDeviceExtensionProperties(physical_device, nullptr, &extensions_count, nullptr);
-  if((result != VK_SUCCESS) || (extensions_count == 0))
+  result = vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &extensionsCount, nullptr);
+  if((result != VK_SUCCESS) || (extensionsCount == 0))
   {
     std::cout << "Could not get the number of device extensions." << std::endl;
     return false;
   }
 
-  available_extensions.resize(extensions_count);
-  result = vkEnumerateDeviceExtensionProperties(physical_device, nullptr, &extensions_count, available_extensions.data());
-  if((result != VK_SUCCESS) || (extensions_count == 0))
+  availableExtensions.resize(extensionsCount);
+  result = vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &extensionsCount, availableExtensions.data());
+  if((result != VK_SUCCESS) || (extensionsCount == 0))
   {
     std::cout << "Could not enumerate device extensions." << std::endl;
     return false;
   }
 
   return true;
+}
+
+void getFeaturesAndPropertiesOfPhysicalDevice(VkPhysicalDevice physicalDevice, VkPhysicalDeviceFeatures &deviceFeatures,
+                                              VkPhysicalDeviceProperties & deviceProperties)
+{
+  vkGetPhysicalDeviceFeatures(physicalDevice, &deviceFeatures);
+  vkGetPhysicalDeviceProperties(physicalDevice, &deviceProperties);
 }
 
 } // namespace VulkanSample

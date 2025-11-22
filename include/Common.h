@@ -34,7 +34,8 @@ bool createInstance(std::vector<const char*> &desiredExtensions, const char* con
 bool loadInstanceLevelFunctions(VkInstance &instance, std::vector<char const *> const & enabledExtensions);
 bool enumerateAvailablePhysicalDevices(VkInstance &instance, std::vector<VkPhysicalDevice> &availableDevices);
 bool checkAvailableDeviceExtensions(VkPhysicalDevice physicalDevice, std::vector<VkExtensionProperties> &availableExtensions);
-void getFeaturesAndPropertiesOfPhysicalDevice(VkPhysicalDevice physicalDevice, VkPhysicalDeviceFeatures &deviceFeatures,
-                                              VkPhysicalDeviceProperties & deviceProperties);
+void getPhysicalDeviceFeaturesAndProperties(VkPhysicalDevice physicalDevice, VkPhysicalDeviceFeatures &deviceFeatures,
+                                              VkPhysicalDeviceProperties &deviceProperties);
+bool selectQueueFamilyIndex(VkPhysicalDevice physicalDevice, VkQueueFlags desiredCapabilities, uint32_t &queueFamilyIndex);
 
 } // namespace VulkanSample

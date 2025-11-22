@@ -24,6 +24,11 @@ bool VulkanApp::init()
     if (!enumerateAvailablePhysicalDevices(mInstance, physicalDevices))
         return false;
 
+    for (auto &physicalDevice : physicalDevices)
+    {
+        
+    }
+
     return true;
 }
 

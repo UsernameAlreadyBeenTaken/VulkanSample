@@ -32,4 +32,10 @@ bool VulkanApp::init()
     return true;
 }
 
+VulkanApp::~VulkanApp()
+{
+    destroyVulkanObjects(mLogicalDevice, mInstance);
+    releaseVulkanLibrary(mVkLibrary);
+}
+
 } //namespace VulkanSample

@@ -43,7 +43,10 @@ bool checkAvailableDeviceExtensions(VkPhysicalDevice physicalDevice, std::vector
 void getPhysicalDeviceFeaturesAndProperties(VkPhysicalDevice physicalDevice, VkPhysicalDeviceFeatures &deviceFeatures,
                                               VkPhysicalDeviceProperties &deviceProperties);
 bool selectQueueFamilyIndex(VkPhysicalDevice physicalDevice, VkQueueFlags desiredCapabilities, uint32_t &queueFamilyIndex);
-bool createLogicalDevice(VkPhysicalDevice physicalDevice, std::vector<QueueInfo> queueInfos, std::vector<const char*> const &desiredExtensions,
-                         VkPhysicalDeviceFeatures *desiredFeatures, VkDevice &logicalDevice);
+bool loadDeviceLevelFunctions(VkDevice logicalDevice, std::vector<const char *> const &enabledExtensions);
+bool createLogicalDevice(VkInstance instance, VkDevice &logicalDevice, VkQueue &graphicsQueue, VkQueue &computeQueue);
+
+void destroyVulkanObjects(VkDevice logicalDevice, VkInstance instance);
+void releaseVulkanLibrary(LIBRARY_TYPE &vulkanLibrary);
 
 } // namespace VulkanSample

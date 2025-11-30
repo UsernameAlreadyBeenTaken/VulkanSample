@@ -254,59 +254,166 @@ bool selectQueueFamilyIndex(VkPhysicalDevice physicalDevice, VkQueueFlags desire
   return false;
 }
 
-bool createLogicalDevice(VkPhysicalDevice physicalDevice, std::vector<QueueInfo> queueInfos, std::vector<const char*> const &desiredExtensions,
-                         VkPhysicalDeviceFeatures *desiredFeatures, VkDevice &logicalDevice)
+bool loadDeviceLevelFunctions(VkDevice logicalDevice, std::vector<const char *> const &enabledExtensions)
 {
-  std::vector<VkExtensionProperties> availableExtensions;
-  if(!checkAvailableDeviceExtensions(physicalDevice, availableExtensions))
-  {
-    return false;
+  // Load core Vulkan API device-level functions
+#define DEVICE_LEVEL_VULKAN_FUNCTION(name)                                                 \
+  name = (PFN_##name)vkGetDeviceProcAddr(logicalDevice, #name);                            \
+  if(name == nullptr)                                                                      \
+  {                                                                                        \
+    std::cout << "Could not load device-level Vulkan function named: " #name << std::endl; \
+    return false;                                                                          \
   }
 
-  for(auto &extension : desiredExtensions)
-  {
-    if(!isExtensionSupported(availableExtensions, extension))
-    {
-      std::cout << "Extension named '" << extension << "' is not supported by a physical device." << std::endl;
-      return false;
+  // Load device-level functions from enabled extensions
+#define DEVICE_LEVEL_VULKAN_FUNCTION_FROM_EXTENSION(name, extension)          \
+    for(auto &enabledExtension : enabledExtensions) \
+    {                      \
+      if(std::string(enabledExtension) == std::string(extension))                                \
+      {                                                                                          \
+        name = (PFN_##name)vkGetDeviceProcAddr(logicalDevice, #name);                            \
+        if(name == nullptr)                                                                      \
+        {                                                                                        \
+          std::cout << "Could not load device-level Vulkan function named: " #name << std::endl; \
+          return false;                                                                          \
+        }                                                                                        \
+      }                                                                                          \
     }
-  }
 
-  std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
-
-  for(auto & info : queueInfos)
-  {
-    queueCreateInfos.push_back({
-        VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,     // VkStructureType             sType
-        nullptr,                                        // const void                * pNext
-        0,                                              // VkDeviceQueueCreateFlags    flags
-        info.familyIndex,                               // uint32_t                    queueFamilyIndex
-        static_cast<uint32_t>(info.priorities.size()),  // uint32_t                    queueCount
-        info.priorities.data()                          // const float               * pQueuePriorities
-      });
-  };
-
-  VkDeviceCreateInfo deviceCreateInfo = {
-    VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,             // VkStructureType                  sType
-    nullptr,                                          // const void                     * pNext
-    0,                                                // VkDeviceCreateFlags              flags
-    static_cast<uint32_t>(queueCreateInfos.size()),   // uint32_t                         queueCreateInfoCount
-    queueCreateInfos.data(),                          // const VkDeviceQueueCreateInfo  * pQueueCreateInfos
-    0,                                                // uint32_t                         enabledLayerCount
-    nullptr,                                          // const char * const             * ppEnabledLayerNames
-    static_cast<uint32_t>(desiredExtensions.size()), // uint32_t                         enabledExtensionCount
-    desiredExtensions.data(),                        // const char * const             * ppEnabledExtensionNames
-    desiredFeatures                                  // const VkPhysicalDeviceFeatures * pEnabledFeatures
-  };
-
-  VkResult result = vkCreateDevice(physicalDevice, &deviceCreateInfo, nullptr, &logicalDevice );
-  if((result != VK_SUCCESS) || (logicalDevice == VK_NULL_HANDLE))
-  {
-    std::cout << "Could not create logical device." << std::endl;
-    return false;
-  }
+#include "ListOfVulkanFunctions.inl"
 
   return true;
+}
+
+bool createLogicalDevice(VkInstance instance, VkDevice &logicalDevice, VkQueue &graphicsQueue, VkQueue &computeQueue)
+{
+
+  std::vector<VkPhysicalDevice> physicalDevices;
+  enumerateAvailablePhysicalDevices(instance, physicalDevices);
+
+  for(auto &physicalDevice : physicalDevices)
+  {
+    VkPhysicalDeviceFeatures deviceFeatures;
+    VkPhysicalDeviceProperties deviceProperties;
+    getPhysicalDeviceFeaturesAndProperties(physicalDevice, deviceFeatures, deviceProperties);
+
+    if(!deviceFeatures.geometryShader)
+    {
+      continue;
+    }
+    else
+    {
+      deviceFeatures = {};
+      deviceFeatures.geometryShader = VK_TRUE;
+    }
+
+    uint32_t graphicsQueueFamilyIndex;
+    if(!selectQueueFamilyIndex(physicalDevice, VK_QUEUE_GRAPHICS_BIT, graphicsQueueFamilyIndex))
+    {
+      continue;
+    }
+
+    uint32_t computeQueueFamilyIndex;
+    if(!selectQueueFamilyIndex(physicalDevice, VK_QUEUE_COMPUTE_BIT, computeQueueFamilyIndex))
+    {
+      continue;
+    }
+
+    std::vector<QueueInfo> requestedQueues = { {graphicsQueueFamilyIndex, {1.0f}} };
+    if(graphicsQueueFamilyIndex != computeQueueFamilyIndex)
+    {
+      requestedQueues.push_back( {computeQueueFamilyIndex, { 1.0f }} );
+    }
+
+    std::vector<const char*> const &desiredExtensions = {};
+
+    std::vector<VkExtensionProperties> availableExtensions;
+    if(!checkAvailableDeviceExtensions(physicalDevice, availableExtensions))
+    {
+      continue;
+    }
+
+    for(auto &extension : desiredExtensions)
+    {
+      if(!isExtensionSupported(availableExtensions, extension))
+      {
+        std::cout << "Extension named '" << extension << "' is not supported by a physical device." << std::endl;
+        continue;
+      }
+    }
+
+    std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
+
+    for(auto & info : requestedQueues)
+    {
+      queueCreateInfos.push_back({
+          VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,     // VkStructureType             sType
+          nullptr,                                        // const void                * pNext
+          0,                                              // VkDeviceQueueCreateFlags    flags
+          info.familyIndex,                               // uint32_t                    queueFamilyIndex
+          static_cast<uint32_t>(info.priorities.size()),  // uint32_t                    queueCount
+          info.priorities.data()                          // const float               * pQueuePriorities
+        });
+    };
+
+    VkDeviceCreateInfo deviceCreateInfo = {
+      VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,             // VkStructureType                  sType
+      nullptr,                                          // const void                     * pNext
+      0,                                                // VkDeviceCreateFlags              flags
+      static_cast<uint32_t>(queueCreateInfos.size()),   // uint32_t                         queueCreateInfoCount
+      queueCreateInfos.data(),                          // const VkDeviceQueueCreateInfo  * pQueueCreateInfos
+      0,                                                // uint32_t                         enabledLayerCount
+      nullptr,                                          // const char * const             * ppEnabledLayerNames
+      static_cast<uint32_t>(desiredExtensions.size()), // uint32_t                         enabledExtensionCount
+      desiredExtensions.data(),                        // const char * const             * ppEnabledExtensionNames
+      &deviceFeatures                                  // const VkPhysicalDeviceFeatures * pEnabledFeatures
+    };
+
+    VkResult result = vkCreateDevice(physicalDevice, &deviceCreateInfo, nullptr, &logicalDevice );
+    if((result != VK_SUCCESS) || (logicalDevice == VK_NULL_HANDLE))
+    {
+      std::cout << "Could not create logical device." << std::endl;
+      continue;
+    }
+
+    if(!loadDeviceLevelFunctions(logicalDevice, {}))
+    {
+      return false;
+    }
+    vkGetDeviceQueue(logicalDevice, graphicsQueueFamilyIndex, 0, &graphicsQueue);
+    vkGetDeviceQueue(logicalDevice, computeQueueFamilyIndex, 0, &computeQueue);
+    return true;
+  }
+
+  return false;
+}
+
+void destroyVulkanObjects(VkDevice logicalDevice, VkInstance instance)
+{
+  if(logicalDevice)
+  {
+    vkDestroyDevice(logicalDevice, nullptr);
+    logicalDevice = VK_NULL_HANDLE;
+  }
+
+  if(instance)
+  {
+    vkDestroyInstance(instance, nullptr);
+    instance = VK_NULL_HANDLE;
+  }
+}
+
+void releaseVulkanLibrary(LIBRARY_TYPE &vulkanLibrary)
+{
+  if(vulkanLibrary != nullptr)
+  {
+#if defined _WIN32
+    FreeLibrary(vulkanLibrary);
+#elif defined __linux
+    dlclose(vulkanLibrary);
+#endif
+    vulkanLibrary = nullptr;
+  }
 }
 
 } // namespace VulkanSample

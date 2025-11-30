@@ -45,5 +45,6 @@ void getPhysicalDeviceFeaturesAndProperties(VkPhysicalDevice physicalDevice, VkP
 bool selectQueueFamilyIndex(VkPhysicalDevice physicalDevice, VkQueueFlags desiredCapabilities, uint32_t &queueFamilyIndex);
 bool createLogicalDevice(VkPhysicalDevice physicalDevice, std::vector<QueueInfo> queueInfos, std::vector<const char*> const &desiredExtensions,
                          VkPhysicalDeviceFeatures *desiredFeatures, VkDevice &logicalDevice);
+bool LoadDeviceLevelFunctions(VkDevice logicalDevice, std::vector<const char *> const &enabledExtensions);
 
 } // namespace VulkanSample

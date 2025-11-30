@@ -309,4 +309,35 @@ bool createLogicalDevice(VkPhysicalDevice physicalDevice, std::vector<QueueInfo>
   return true;
 }
 
+bool LoadDeviceLevelFunctions(VkDevice logicalDevice, std::vector<const char *> const &enabledExtensions)
+{
+  // Load core Vulkan API device-level functions
+#define DEVICE_LEVEL_VULKAN_FUNCTION(name)                                                 \
+  name = (PFN_##name)vkGetDeviceProcAddr(logicalDevice, #name);                            \
+  if(name == nullptr)                                                                      \
+  {                                                                                        \
+    std::cout << "Could not load device-level Vulkan function named: " #name << std::endl; \
+    return false;                                                                          \
+  }
+
+  // Load device-level functions from enabled extensions
+#define DEVICE_LEVEL_VULKAN_FUNCTION_FROM_EXTENSION(name, extension)          \
+    for(auto &enabledExtension : enabledExtensions) \
+    {                      \
+      if(std::string(enabledExtension) == std::string(extension))                                \
+      {                                                                                          \
+        name = (PFN_##name)vkGetDeviceProcAddr(logicalDevice, #name);                            \
+        if(name == nullptr)                                                                      \
+        {                                                                                        \
+          std::cout << "Could not load device-level Vulkan function named: " #name << std::endl; \
+          return false;                                                                          \
+        }                                                                                        \
+      }                                                                                          \
+    }
+
+#include "ListOfVulkanFunctions.inl"
+
+  return true;
+}
+
 } // namespace VulkanSample

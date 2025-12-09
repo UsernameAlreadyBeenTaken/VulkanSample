@@ -14,7 +14,19 @@ bool VulkanApp::init()
     if(!loadGlobalLevelFunctions())
         return false;
 
-    if (!createInstance({}, "VulkanSample", mInstance))
+    std::vector<const char*> desiredExtensions;
+    desiredExtensions.emplace_back(VK_KHR_SURFACE_EXTENSION_NAME);
+    desiredExtensions.emplace_back(
+#ifdef VK_USE_PLATFORM_WIN32_KHR
+      VK_KHR_WIN32_SURFACE_EXTENSION_NAME
+#elif defined VK_USE_PLATFORM_XCB_KHR
+      VK_KHR_XCB_SURFACE_EXTENSION_NAME
+#elif defined VK_USE_PLATFORM_XLIB_KHR
+      VK_KHR_XLIB_SURFACE_EXTENSION_NAME
+#endif
+    );
+
+    if (!createInstance(desiredExtensions, "VulkanSample", mInstance))
         return false;
 
     if (!loadInstanceLevelFunctions(mInstance, {}))

@@ -57,19 +57,19 @@ bool loadGlobalLevelFunctions()
 
 bool checkAvailableInstanceExtensions(std::vector<VkExtensionProperties> &availableExtensions)
 {
-  uint32_t extensions_count = 0;
+  uint32_t extensionsCount = 0;
   VkResult result = VK_SUCCESS;
 
-  result = vkEnumerateInstanceExtensionProperties(nullptr, &extensions_count, nullptr);
-  if((result != VK_SUCCESS) || (extensions_count == 0))
+  result = vkEnumerateInstanceExtensionProperties(nullptr, &extensionsCount, nullptr);
+  if((result != VK_SUCCESS) || (extensionsCount == 0))
   {
     std::cerr << "Could not get the number of instance extensions." << std::endl;
     return false;
   }
 
-  availableExtensions.resize(extensions_count);
-  result = vkEnumerateInstanceExtensionProperties(nullptr, &extensions_count, availableExtensions.data());
-  if((result != VK_SUCCESS) || (extensions_count == 0))
+  availableExtensions.resize(extensionsCount);
+  result = vkEnumerateInstanceExtensionProperties(nullptr, &extensionsCount, availableExtensions.data());
+  if((result != VK_SUCCESS) || (extensionsCount == 0))
   {
     std::cerr << "Could not enumerate instance extensions." << std::endl;
     return false;
@@ -90,6 +90,36 @@ bool isExtensionSupported(std::vector<VkExtensionProperties> const &availableExt
   return false;
 }
 
+bool isLayerSupported(const char* desiredLayer)
+{
+  uint32_t layerCount = 0;
+  VkResult result = VK_SUCCESS;
+  result = vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
+  if((result != VK_SUCCESS) || (layerCount == 0))
+  {
+    std::cerr << "Could not get the number of instance layers." << std::endl;
+    return false;
+  }
+
+  std::vector<VkLayerProperties> availableLayers(layerCount);
+  result = vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
+  if((result != VK_SUCCESS) || (layerCount == 0))
+  {
+    std::cerr << "Could not enumerate instance layers." << std::endl;
+    return false;
+  }
+
+  for (auto &layer : availableLayers)
+  {
+    if (strstr(layer.layerName, desiredLayer))
+    {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 bool createInstance(std::vector<const char*> &desiredExtensions, const char* const appName, VkInstance &instance)
 {
   std::vector<VkExtensionProperties> availableExtensions;
@@ -104,6 +134,19 @@ bool createInstance(std::vector<const char*> &desiredExtensions, const char* con
       return false;
     }
   }
+
+  std::vector<const char*> desiredLayers = {};
+#ifdef _DEBUG
+  desiredLayers.emplace_back("VK_LAYER_KHRONOS_validation");
+  for(auto layer : desiredLayers)
+  {
+    if(!isLayerSupported(layer))
+    {
+      std::cerr << "Layer " << layer << " requested but not found" << std::endl;
+      return false;
+    }
+  }
+#endif
 
   VkApplicationInfo applicationInfo = {
     VK_STRUCTURE_TYPE_APPLICATION_INFO,   // VkStructureType           sType
@@ -120,8 +163,8 @@ bool createInstance(std::vector<const char*> &desiredExtensions, const char* con
     nullptr,                                            // const void               *pNext
     0,                                                  // VkInstanceCreateFlags     flags
     &applicationInfo,                                   // const VkApplicationInfo  *pApplicationInfo
-    0,                                                  // uint32_t                  enabledLayerCount
-    nullptr,                                            // const char * const       *ppEnabledLayerNames
+    static_cast<uint32_t>(desiredLayers.size()),        // uint32_t                  enabledLayerCount
+    desiredLayers.data(),                               // const char * const       *ppEnabledLayerNames
     static_cast<uint32_t>(desiredExtensions.size()),    // uint32_t                  enabledExtensionCount
     desiredExtensions.data()                            // const char * const       *ppEnabledExtensionNames
   };
@@ -215,13 +258,6 @@ bool checkAvailableDeviceExtensions(VkPhysicalDevice physicalDevice, std::vector
   return true;
 }
 
-void getPhysicalDeviceFeaturesAndProperties(VkPhysicalDevice physicalDevice, VkPhysicalDeviceFeatures &deviceFeatures,
-                                              VkPhysicalDeviceProperties &deviceProperties)
-{
-  vkGetPhysicalDeviceFeatures(physicalDevice, &deviceFeatures);
-  vkGetPhysicalDeviceProperties(physicalDevice, &deviceProperties);
-}
-
 bool selectQueueFamilyIndex(VkPhysicalDevice physicalDevice, VkQueueFlags desiredCapabilities, uint32_t &queueFamilyIndex)
 {
   std::vector<VkQueueFamilyProperties> queueFamilies;
@@ -295,7 +331,9 @@ bool createLogicalDevice(VkInstance instance, VkDevice &logicalDevice, VkQueue &
   {
     VkPhysicalDeviceFeatures deviceFeatures;
     VkPhysicalDeviceProperties deviceProperties;
-    getPhysicalDeviceFeaturesAndProperties(physicalDevice, deviceFeatures, deviceProperties);
+
+    vkGetPhysicalDeviceFeatures(physicalDevice, &deviceFeatures);
+    vkGetPhysicalDeviceProperties(physicalDevice, &deviceProperties);
 
     if(!deviceFeatures.geometryShader)
     {

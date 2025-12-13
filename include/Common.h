@@ -30,6 +30,20 @@ struct QueueInfo
     std::vector<float> priorities;
 };
 
+struct WindowParameters
+{
+#ifdef VK_USE_PLATFORM_WIN32_KHR
+    HINSTANCE          HInstance;
+    HWND               HWnd;
+#elif defined VK_USE_PLATFORM_XLIB_KHR
+    Display          * Dpy;
+    Window             Window;
+#elif defined VK_USE_PLATFORM_XCB_KHR
+    xcb_connection_t * Connection;
+    xcb_window_t       Window;
+#endif
+};
+
 bool loadVkLibrary(LIBRARY_TYPE &vkLibrary);
 bool loadFunctionFromVulkanLibrary(LIBRARY_TYPE const &vkLibrary);
 bool loadGlobalLevelFunctions();
@@ -43,8 +57,8 @@ bool checkAvailableDeviceExtensions(VkPhysicalDevice physicalDevice, std::vector
 bool selectQueueFamilyIndex(VkPhysicalDevice physicalDevice, VkQueueFlags desiredCapabilities, uint32_t &queueFamilyIndex);
 bool loadDeviceLevelFunctions(VkDevice logicalDevice, std::vector<const char *> const &enabledExtensions);
 bool createLogicalDevice(VkInstance instance, VkDevice &logicalDevice, VkQueue &graphicsQueue, VkQueue &computeQueue);
+bool createPresentationSurface(VkInstance instance, WindowParameters windowParameters, VkSurfaceKHR presentationSurface);
 
-void destroyVulkanObjects(VkDevice logicalDevice, VkInstance instance);
 void releaseVulkanLibrary(LIBRARY_TYPE &vulkanLibrary);
 
 } // namespace VulkanSample

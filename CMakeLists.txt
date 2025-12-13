@@ -38,12 +38,18 @@ else()
     endif()
 endif()
 
-if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-    include_directories(${VULKAN_PATH}/Include)
-    link_directories(${VULKAN_PATH}/Bin)
+if(NOT DEFINED VK_USE_PLATFORM)
+    if(WIN32)
+        set(VK_USE_PLATFORM "WIN32")
+        include_directories(${VULKAN_PATH}/Include)
+        link_directories(${VULKAN_PATH}/Bin)
+    elseif( UNIX )
+        set(VK_USE_PLATFORM "XCB")
+    endif()
 endif()
 
 add_definitions(-DVK_NO_PROTOTYPES)
+add_definitions(-DVK_USE_PLATFORM_${VK_USE_PLATFORM}_KHR)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
@@ -51,8 +57,6 @@ file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 file(GLOB_RECURSE HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/include/*.* ${CMAKE_CURRENT_SOURCE_DIR}/external/*.*)
 
 add_executable(${NAME} ${SOURCES} ${HEADERS})
-
-#target_link_libraries(${NAME} PRIVATE Vulkan::Vulkan)
 
 set_property(TARGET ${NAME} PROPERTY RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/build)
 set_property(TARGET ${NAME} PROPERTY RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_CURRENT_SOURCE_DIR}/build/Debug)

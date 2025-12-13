@@ -8,6 +8,7 @@
 #endif
 
 #include "VulkanFunctions.h"
+#include "OSspecific.h"
 
 namespace VulkanSample
 {
@@ -43,8 +44,8 @@ bool checkAvailableDeviceExtensions(VkPhysicalDevice physicalDevice, std::vector
 bool selectQueueFamilyIndex(VkPhysicalDevice physicalDevice, VkQueueFlags desiredCapabilities, uint32_t &queueFamilyIndex);
 bool loadDeviceLevelFunctions(VkDevice logicalDevice, std::vector<const char *> const &enabledExtensions);
 bool createLogicalDevice(VkInstance instance, VkDevice &logicalDevice, VkQueue &graphicsQueue, VkQueue &computeQueue);
+bool createPresentationSurface(VkInstance instance, WindowParameters windowParameters, VkSurfaceKHR presentationSurface);
 
-void destroyVulkanObjects(VkDevice logicalDevice, VkInstance instance);
 void releaseVulkanLibrary(LIBRARY_TYPE &vulkanLibrary);
 
 } // namespace VulkanSample

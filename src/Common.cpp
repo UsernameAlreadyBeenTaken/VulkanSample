@@ -426,19 +426,48 @@ bool createLogicalDevice(VkInstance instance, VkDevice &logicalDevice, VkQueue &
   return false;
 }
 
-void destroyVulkanObjects(VkDevice logicalDevice, VkInstance instance)
+bool createPresentationSurface(VkInstance instance, WindowParameters windowParameters, VkSurfaceKHR presentationSurface)
 {
-  if(logicalDevice)
-  {
-    vkDestroyDevice(logicalDevice, nullptr);
-    logicalDevice = VK_NULL_HANDLE;
-  }
+  VkResult result = VK_RESULT_MAX_ENUM;
 
-  if(instance)
+#ifdef VK_USE_PLATFORM_WIN32_KHR
+  VkWin32SurfaceCreateInfoKHR surfaceCreateInfo =
   {
-    vkDestroyInstance(instance, nullptr);
-    instance = VK_NULL_HANDLE;
+    VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR,  // VkStructureType                 sType
+    nullptr,                                          // const void                    * pNext
+    0,                                                // VkWin32SurfaceCreateFlagsKHR    flags
+    windowParameters.HInstance,                      // HINSTANCE                       hinstance
+    windowParameters.HWnd                            // HWND                            hwnd
+  };
+  result = vkCreateWin32SurfaceKHR(instance, &surfaceCreateInfo, nullptr, &presentationSurface);
+#elif defined VK_USE_PLATFORM_XLIB_KHR
+  VkXlibSurfaceCreateInfoKHR surfaceCreateInfo =
+  {
+    VK_STRUCTURE_TYPE_XLIB_SURFACE_CREATE_INFO_KHR,   // VkStructureType                 sType
+    nullptr,                                          // const void                    * pNext
+    0,                                                // VkXlibSurfaceCreateFlagsKHR     flags
+    windowParameters.Dpy,                            // Display                       * dpy
+    windowParameters.Window                          // Window                          window
+  };
+  result = vkCreateXlibSurfaceKHR(instance, &surfaceCreateInfo, nullptr, &presentationSurface);
+#elif defined VK_USE_PLATFORM_XCB_KHR
+  VkXcbSurfaceCreateInfoKHR surfaceCreateInfo =
+  {
+    VK_STRUCTURE_TYPE_XCB_SURFACE_CREATE_INFO_KHR,    // VkStructureType                 sType
+    nullptr,                                          // const void                    * pNext
+    0,                                                // VkXcbSurfaceCreateFlagsKHR      flags
+    window_parameters.Connection,                     // xcb_connection_t              * connection
+    window_parameters.Window                          // xcb_window_t                    window
+  };
+  result = vkCreateXcbSurfaceKHR(instance, &surfaceCreateInfo, nullptr, &presentationSurface);
+#endif
+
+  if((VK_SUCCESS != result) || (VK_NULL_HANDLE == presentationSurface))
+  {
+    std::cout << "Could not create presentation surface." << std::endl;
+    return false;
   }
+  return true;
 }
 
 void releaseVulkanLibrary(LIBRARY_TYPE &vulkanLibrary)

@@ -3,7 +3,7 @@
 namespace VulkanSample
 {
 
-bool VulkanApp::init()
+bool VulkanApp::init(WindowParameters windowParameters)
 {
     if (!loadVkLibrary(mVkLibrary))
         return false;
@@ -32,6 +32,9 @@ bool VulkanApp::init()
     if (!loadInstanceLevelFunctions(mInstance, {}))
         return false;
 
+    if(!createPresentationSurface(mInstance, windowParameters, mSurface))
+        return false;
+
     std::vector<VkPhysicalDevice> physicalDevices;
     if (!enumerateAvailablePhysicalDevices(mInstance, physicalDevices))
         return false;
@@ -46,8 +49,25 @@ bool VulkanApp::init()
 
 VulkanApp::~VulkanApp()
 {
-    destroyVulkanObjects(mLogicalDevice, mInstance);
-    releaseVulkanLibrary(mVkLibrary);
+  if(mLogicalDevice)
+  {
+    vkDestroyDevice(mLogicalDevice, nullptr);
+    mLogicalDevice = VK_NULL_HANDLE;
+  }
+
+  if(mSurface)
+  {
+    vkDestroySurfaceKHR(mInstance, mSurface, nullptr);
+    mSurface = VK_NULL_HANDLE;
+  }
+
+  if(mInstance)
+  {
+    vkDestroyInstance(mInstance, nullptr);
+    mInstance = VK_NULL_HANDLE;
+  }
+
+  releaseVulkanLibrary(mVkLibrary);
 }
 
 } //namespace VulkanSample

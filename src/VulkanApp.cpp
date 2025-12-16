@@ -3,6 +3,13 @@
 namespace VulkanSample
 {
 
+VulkanApp::VulkanApp()
+{
+    mInstance      = VK_NULL_HANDLE;
+    mSurface       = VK_NULL_HANDLE;
+    mLogicalDevice = VK_NULL_HANDLE;
+}
+
 bool VulkanApp::init(WindowParameters windowParameters)
 {
     if (!loadVkLibrary(mVkLibrary))
@@ -14,9 +21,9 @@ bool VulkanApp::init(WindowParameters windowParameters)
     if(!loadGlobalLevelFunctions())
         return false;
 
-    std::vector<const char*> desiredExtensions;
-    desiredExtensions.emplace_back(VK_KHR_SURFACE_EXTENSION_NAME);
-    desiredExtensions.emplace_back(
+    std::vector<const char*> desiredInstanceExtensions;
+    desiredInstanceExtensions.emplace_back(VK_KHR_SURFACE_EXTENSION_NAME);
+    desiredInstanceExtensions.emplace_back(
 #ifdef VK_USE_PLATFORM_WIN32_KHR
       VK_KHR_WIN32_SURFACE_EXTENSION_NAME
 #elif defined VK_USE_PLATFORM_XCB_KHR
@@ -26,7 +33,7 @@ bool VulkanApp::init(WindowParameters windowParameters)
 #endif
     );
 
-    if (!createInstance(desiredExtensions, "VulkanSample", mInstance))
+    if (!createInstance(desiredInstanceExtensions, "VulkanSample", mInstance))
         return false;
 
     if (!loadInstanceLevelFunctions(mInstance, {}))
@@ -39,10 +46,10 @@ bool VulkanApp::init(WindowParameters windowParameters)
     if (!enumerateAvailablePhysicalDevices(mInstance, physicalDevices))
         return false;
 
-    for (auto &physicalDevice : physicalDevices)
-    {
-        
-    }
+    std::vector<const char*> desiredDeviceExtensions;
+    desiredDeviceExtensions.emplace_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+    if(!createLogicalDevice(mInstance, mLogicalDevice, desiredDeviceExtensions, mSurface, mGraphicsQueue, mComputeQueue, mPresentQueue))
+        return false;
 
     return true;
 }
@@ -50,22 +57,13 @@ bool VulkanApp::init(WindowParameters windowParameters)
 VulkanApp::~VulkanApp()
 {
   if(mLogicalDevice)
-  {
     vkDestroyDevice(mLogicalDevice, nullptr);
-    mLogicalDevice = VK_NULL_HANDLE;
-  }
 
   if(mSurface)
-  {
     vkDestroySurfaceKHR(mInstance, mSurface, nullptr);
-    mSurface = VK_NULL_HANDLE;
-  }
 
   if(mInstance)
-  {
     vkDestroyInstance(mInstance, nullptr);
-    mInstance = VK_NULL_HANDLE;
-  }
 
   releaseVulkanLibrary(mVkLibrary);
 }

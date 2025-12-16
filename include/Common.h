@@ -31,6 +31,17 @@ struct QueueInfo
     std::vector<float> priorities;
 };
 
+inline bool operator==(const QueueInfo &lhs, const QueueInfo &rhs)
+{
+    return lhs.familyIndex == rhs.familyIndex && lhs.priorities == rhs.priorities;
+}
+
+struct QueueParameters
+{
+  VkQueue   handle;
+  uint32_t  familyIndex;
+};
+
 bool loadVkLibrary(LIBRARY_TYPE &vkLibrary);
 bool loadFunctionFromVulkanLibrary(LIBRARY_TYPE const &vkLibrary);
 bool loadGlobalLevelFunctions();
@@ -42,8 +53,10 @@ bool loadInstanceLevelFunctions(VkInstance &instance, std::vector<char const *> 
 bool enumerateAvailablePhysicalDevices(VkInstance &instance, std::vector<VkPhysicalDevice> &availableDevices);
 bool checkAvailableDeviceExtensions(VkPhysicalDevice physicalDevice, std::vector<VkExtensionProperties> &availableExtensions);
 bool selectQueueFamilyIndex(VkPhysicalDevice physicalDevice, VkQueueFlags desiredCapabilities, uint32_t &queueFamilyIndex);
+bool selectQueueFamilyIndex(VkPhysicalDevice physicalDevice, VkSurfaceKHR presentationSurface, uint32_t &queueFamilyIndex);
 bool loadDeviceLevelFunctions(VkDevice logicalDevice, std::vector<const char *> const &enabledExtensions);
-bool createLogicalDevice(VkInstance instance, VkDevice &logicalDevice, VkQueue &graphicsQueue, VkQueue &computeQueue);
+bool createLogicalDevice(VkInstance instance, VkDevice &logicalDevice, std::vector<const char*> &desiredExtensions, VkSurfaceKHR surface,
+                         QueueParameters &graphicsQueue, QueueParameters &computeQueue, QueueParameters &presentQueue);
 bool createPresentationSurface(VkInstance instance, WindowParameters windowParameters, VkSurfaceKHR presentationSurface);
 
 void releaseVulkanLibrary(LIBRARY_TYPE &vulkanLibrary);

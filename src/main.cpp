@@ -2,8 +2,6 @@
 
 int main()
 {
-  VulkanSample::VulkanApp app;
-
   VulkanSample::WindowParameters windowParameters = {};
   if(!VulkanSample::createWindowHandle(windowParameters, "VulkanSample", 50, 25, 1280, 800))
   {
@@ -11,6 +9,7 @@ int main()
       return -1;
   }
 
+  VulkanSample::VulkanApp app;
   if (!app.init(windowParameters))
   {
       std::cerr << "Error initializing Vulkan application, finishing execution..." << std::endl;

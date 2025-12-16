@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include "Common.h"
 
 namespace VulkanSample
@@ -290,6 +292,39 @@ bool selectQueueFamilyIndex(VkPhysicalDevice physicalDevice, VkQueueFlags desire
   return false;
 }
 
+bool selectQueueFamilyIndex(VkPhysicalDevice physicalDevice, VkSurfaceKHR presentationSurface, uint32_t &queueFamilyIndex)
+{
+  std::vector<VkQueueFamilyProperties> queueFamilies;
+  uint32_t queueFamiliesCount = 0;
+
+  vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamiliesCount, nullptr);
+  if(queueFamiliesCount == 0)
+  {
+    std::cout << "Could not get the number of queue families." << std::endl;
+    return false;
+  }
+
+  queueFamilies.resize( queueFamiliesCount );
+  vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamiliesCount, queueFamilies.data());
+  if(queueFamiliesCount == 0)
+  {
+    std::cout << "Could not acquire properties of queue families." << std::endl;
+    return false;
+  }
+
+  for(uint32_t index = 0; index < static_cast<uint32_t>(queueFamilies.size()); ++index)
+  {
+    VkBool32 isPresentationSupported = VK_FALSE;
+    VkResult result = vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, index, presentationSurface, &isPresentationSupported);
+    if((result == VK_SUCCESS) && (isPresentationSupported == VK_TRUE))
+    {
+      queueFamilyIndex = index;
+      return true;
+    }
+  }
+  return false;
+}
+
 bool loadDeviceLevelFunctions(VkDevice logicalDevice, std::vector<const char *> const &enabledExtensions)
 {
   // Load core Vulkan API device-level functions
@@ -321,7 +356,8 @@ bool loadDeviceLevelFunctions(VkDevice logicalDevice, std::vector<const char *> 
   return true;
 }
 
-bool createLogicalDevice(VkInstance instance, VkDevice &logicalDevice, VkQueue &graphicsQueue, VkQueue &computeQueue)
+bool createLogicalDevice(VkInstance instance, VkDevice &logicalDevice, std::vector<const char*> &desiredExtensions, VkSurfaceKHR surface,
+                         QueueParameters &graphicsQueue, QueueParameters &computeQueue, QueueParameters &presentQueue)
 {
 
   std::vector<VkPhysicalDevice> physicalDevices;
@@ -357,13 +393,23 @@ bool createLogicalDevice(VkInstance instance, VkDevice &logicalDevice, VkQueue &
       continue;
     }
 
-    std::vector<QueueInfo> requestedQueues = { {graphicsQueueFamilyIndex, {1.0f}} };
-    if(graphicsQueueFamilyIndex != computeQueueFamilyIndex)
+    uint32_t presentQueueFamilyIndex;
+    if(!selectQueueFamilyIndex(physicalDevice, surface, presentQueueFamilyIndex))
     {
-      requestedQueues.push_back( {computeQueueFamilyIndex, { 1.0f }} );
+      continue;
     }
 
-    std::vector<const char*> const &desiredExtensions = {};
+    std::vector<QueueInfo> requestedQueues = { {graphicsQueueFamilyIndex, {1.0f}} };
+    auto insertIfUnique = [](std::vector<QueueInfo> &vec, QueueInfo item)
+    {
+      if (std::find(vec.begin(), vec.end(), item) == vec.end())
+      {
+        vec.push_back(item);
+      }
+    };
+
+    insertIfUnique(requestedQueues, {computeQueueFamilyIndex, { 1.0f }});
+    insertIfUnique(requestedQueues, {presentQueueFamilyIndex, { 1.0f }});
 
     std::vector<VkExtensionProperties> availableExtensions;
     if(!checkAvailableDeviceExtensions(physicalDevice, availableExtensions))
@@ -418,8 +464,9 @@ bool createLogicalDevice(VkInstance instance, VkDevice &logicalDevice, VkQueue &
     {
       return false;
     }
-    vkGetDeviceQueue(logicalDevice, graphicsQueueFamilyIndex, 0, &graphicsQueue);
-    vkGetDeviceQueue(logicalDevice, computeQueueFamilyIndex, 0, &computeQueue);
+    vkGetDeviceQueue(logicalDevice, graphicsQueueFamilyIndex, 0, &graphicsQueue.handle);
+    vkGetDeviceQueue(logicalDevice, computeQueueFamilyIndex, 0, &computeQueue.handle);
+    vkGetDeviceQueue(logicalDevice, presentQueueFamilyIndex, 0, &presentQueue.handle);
     return true;
   }
 

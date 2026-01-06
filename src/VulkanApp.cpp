@@ -56,11 +56,14 @@ bool VulkanApp::init(WindowParameters windowParameters)
 
 VulkanApp::~VulkanApp()
 {
-  if(mLogicalDevice)
-    vkDestroyDevice(mLogicalDevice, nullptr);
+  if(mSwapchain)
+    vkDestroySwapchainKHR(mLogicalDevice, mSwapchain, nullptr);
 
   if(mSurface)
     vkDestroySurfaceKHR(mInstance, mSurface, nullptr);
+
+  if(mLogicalDevice)
+    vkDestroyDevice(mLogicalDevice, nullptr);
 
   if(mInstance)
     vkDestroyInstance(mInstance, nullptr);

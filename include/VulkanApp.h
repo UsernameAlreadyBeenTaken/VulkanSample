@@ -20,6 +20,7 @@ private:
     QueueParameters  mGraphicsQueue;
     QueueParameters  mComputeQueue;
     QueueParameters  mPresentQueue;
+    VkSwapchainKHR   mSwapchain;
 };
 
 } //namespace VulkanSample

@@ -58,6 +58,15 @@ bool loadDeviceLevelFunctions(VkDevice logicalDevice, std::vector<const char *> 
 bool createLogicalDevice(VkInstance instance, VkDevice &logicalDevice, std::vector<const char*> &desiredExtensions, VkSurfaceKHR surface,
                          QueueParameters &graphicsQueue, QueueParameters &computeQueue, QueueParameters &presentQueue);
 bool createPresentationSurface(VkInstance instance, WindowParameters windowParameters, VkSurfaceKHR presentationSurface);
+bool selectPresentationMode(VkPhysicalDevice physicalDevice, VkSurfaceKHR presentationSurface, VkPresentModeKHR desiredMode, 
+                            VkPresentModeKHR &presentMode);
+bool selectSwapchainImageFormat(VkPhysicalDevice physicalDevice, VkSurfaceKHR presentationSurface,
+                                VkSurfaceFormatKHR desiredSurfaceFormat, VkFormat &imageFormat, VkColorSpaceKHR &imageColorSpace);
+bool createSwapchain(VkPhysicalDevice physicalDevice, VkSurfaceKHR presentationSurface, VkDevice logicalDevice,
+                      VkPresentModeKHR desiredMode, VkSurfaceFormatKHR desiredSurfaceFormat,
+                      VkSurfaceTransformFlagBitsKHR desiredTransform, VkImageUsageFlags swapchainImageUsage,
+                      VkExtent2D &imageSize, VkFormat &imageFormat, VkSwapchainKHR &oldSwapchain, VkSwapchainKHR &swapchain, 
+                      std::vector<VkImage> &swapchainImages);
 
 void releaseVulkanLibrary(LIBRARY_TYPE &vulkanLibrary);
 

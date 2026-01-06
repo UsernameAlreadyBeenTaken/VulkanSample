@@ -188,7 +188,7 @@ bool loadInstanceLevelFunctions(VkInstance &instance, std::vector<char const *> 
     name = (PFN_##name)vkGetInstanceProcAddr(instance, #name);                \
     if(name == nullptr)                                                       \
     {                                                                         \
-      std::cout << "Could not load instance-level Vulkan function named: "    \
+      std::cerr << "Could not load instance-level Vulkan function named: "    \
         #name << std::endl;                                                   \
       return false;                                                           \
     }
@@ -202,7 +202,7 @@ bool loadInstanceLevelFunctions(VkInstance &instance, std::vector<char const *> 
         name = (PFN_##name)vkGetInstanceProcAddr( instance, #name );           \
         if(name == nullptr)                                                    \
         {                                                                      \
-          std::cout << "Could not load instance-level Vulkan function named: " \
+          std::cerr << "Could not load instance-level Vulkan function named: " \
             #name << std::endl;                                                \
           return false;                                                        \
         }                                                                      \
@@ -222,7 +222,7 @@ bool enumerateAvailablePhysicalDevices(VkInstance &instance, std::vector<VkPhysi
   result = vkEnumeratePhysicalDevices(instance, &devices_count, nullptr);
   if((result != VK_SUCCESS) || (devices_count == 0))
   {
-    std::cout << "Could not get the number of available physical devices." << std::endl;
+    std::cerr << "Could not get the number of available physical devices." << std::endl;
     return false;
   }
 
@@ -230,7 +230,7 @@ bool enumerateAvailablePhysicalDevices(VkInstance &instance, std::vector<VkPhysi
   result = vkEnumeratePhysicalDevices(instance, &devices_count, availableDevices.data());
   if((result != VK_SUCCESS) || (devices_count == 0))
   {
-    std::cout << "Could not enumerate physical devices." << std::endl;
+    std::cerr << "Could not enumerate physical devices." << std::endl;
     return false;
   }
 
@@ -245,7 +245,7 @@ bool checkAvailableDeviceExtensions(VkPhysicalDevice physicalDevice, std::vector
   result = vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &extensionsCount, nullptr);
   if((result != VK_SUCCESS) || (extensionsCount == 0))
   {
-    std::cout << "Could not get the number of device extensions." << std::endl;
+    std::cerr << "Could not get the number of device extensions." << std::endl;
     return false;
   }
 
@@ -253,7 +253,7 @@ bool checkAvailableDeviceExtensions(VkPhysicalDevice physicalDevice, std::vector
   result = vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &extensionsCount, availableExtensions.data());
   if((result != VK_SUCCESS) || (extensionsCount == 0))
   {
-    std::cout << "Could not enumerate device extensions." << std::endl;
+    std::cerr << "Could not enumerate device extensions." << std::endl;
     return false;
   }
 
@@ -268,7 +268,7 @@ bool selectQueueFamilyIndex(VkPhysicalDevice physicalDevice, VkQueueFlags desire
   vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamiliesCount, nullptr);
   if(queueFamiliesCount == 0)
   {
-    std::cout << "Could not get the number of queue families." << std::endl;
+    std::cerr << "Could not get the number of queue families." << std::endl;
     return false;
   }
 
@@ -276,7 +276,7 @@ bool selectQueueFamilyIndex(VkPhysicalDevice physicalDevice, VkQueueFlags desire
   vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamiliesCount, queueFamilies.data());
   if(queueFamiliesCount == 0)
   {
-    std::cout << "Could not acquire properties of queue families." << std::endl;
+    std::cerr << "Could not acquire properties of queue families." << std::endl;
     return false;
   }
 
@@ -300,7 +300,7 @@ bool selectQueueFamilyIndex(VkPhysicalDevice physicalDevice, VkSurfaceKHR presen
   vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamiliesCount, nullptr);
   if(queueFamiliesCount == 0)
   {
-    std::cout << "Could not get the number of queue families." << std::endl;
+    std::cerr << "Could not get the number of queue families." << std::endl;
     return false;
   }
 
@@ -308,7 +308,7 @@ bool selectQueueFamilyIndex(VkPhysicalDevice physicalDevice, VkSurfaceKHR presen
   vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamiliesCount, queueFamilies.data());
   if(queueFamiliesCount == 0)
   {
-    std::cout << "Could not acquire properties of queue families." << std::endl;
+    std::cerr << "Could not acquire properties of queue families." << std::endl;
     return false;
   }
 
@@ -332,7 +332,7 @@ bool loadDeviceLevelFunctions(VkDevice logicalDevice, std::vector<const char *> 
   name = (PFN_##name)vkGetDeviceProcAddr(logicalDevice, #name);                            \
   if(name == nullptr)                                                                      \
   {                                                                                        \
-    std::cout << "Could not load device-level Vulkan function named: " #name << std::endl; \
+    std::cerr << "Could not load device-level Vulkan function named: " #name << std::endl; \
     return false;                                                                          \
   }
 
@@ -345,7 +345,7 @@ bool loadDeviceLevelFunctions(VkDevice logicalDevice, std::vector<const char *> 
         name = (PFN_##name)vkGetDeviceProcAddr(logicalDevice, #name);                            \
         if(name == nullptr)                                                                      \
         {                                                                                        \
-          std::cout << "Could not load device-level Vulkan function named: " #name << std::endl; \
+          std::cerr << "Could not load device-level Vulkan function named: " #name << std::endl; \
           return false;                                                                          \
         }                                                                                        \
       }                                                                                          \
@@ -421,7 +421,7 @@ bool createLogicalDevice(VkInstance instance, VkDevice &logicalDevice, std::vect
     {
       if(!isExtensionSupported(availableExtensions, extension))
       {
-        std::cout << "Extension named '" << extension << "' is not supported by a physical device." << std::endl;
+        std::cerr << "Extension named '" << extension << "' is not supported by a physical device." << std::endl;
         continue;
       }
     }
@@ -456,7 +456,7 @@ bool createLogicalDevice(VkInstance instance, VkDevice &logicalDevice, std::vect
     VkResult result = vkCreateDevice(physicalDevice, &deviceCreateInfo, nullptr, &logicalDevice );
     if((result != VK_SUCCESS) || (logicalDevice == VK_NULL_HANDLE))
     {
-      std::cout << "Could not create logical device." << std::endl;
+      std::cerr << "Could not create logical device." << std::endl;
       continue;
     }
 
@@ -511,9 +511,225 @@ bool createPresentationSurface(VkInstance instance, WindowParameters windowParam
 
   if((VK_SUCCESS != result) || (VK_NULL_HANDLE == presentationSurface))
   {
-    std::cout << "Could not create presentation surface." << std::endl;
+    std::cerr << "Could not create presentation surface." << std::endl;
     return false;
   }
+  return true;
+}
+
+bool selectPresentationMode(VkPhysicalDevice physicalDevice, VkSurfaceKHR presentationSurface, VkPresentModeKHR desiredMode, 
+                            VkPresentModeKHR &presentMode)
+{
+  uint32_t presentModesCount = 0;
+  VkResult result = VK_SUCCESS;
+
+  result = vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, presentationSurface, &presentModesCount, nullptr);
+  if((result != VK_SUCCESS) || (presentModesCount == 0))
+  {
+    std::cerr << "Could not get the number of supported present modes." << std::endl;
+    return false;
+  }
+
+  std::vector<VkPresentModeKHR> presentModes(presentModesCount);
+  result = vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, presentationSurface, &presentModesCount, presentModes.data());
+  if((result != VK_SUCCESS) || (presentModesCount == 0))
+  {
+    std::cerr << "Could not enumerate present modes." << std::endl;
+    return false;
+  }
+
+  for(auto &currentPresentMode : presentModes)
+  {
+    if(currentPresentMode == desiredMode)
+    {
+      presentMode = desiredMode;
+      return true;
+    }
+  }
+
+  std::cout << "Desired present mode is not supported. Selecting default FIFO mode." << std::endl;
+  for(auto &currentPresentMode : presentModes)
+  {
+    if(currentPresentMode == VK_PRESENT_MODE_FIFO_KHR)
+    {
+      presentMode = VK_PRESENT_MODE_FIFO_KHR;
+      return true;
+    }
+  }
+
+  std::cerr << "VK_PRESENT_MODE_FIFO_KHR is not supported though it's mandatory for all drivers!" << std::endl;
+  return false;
+}
+
+bool selectSwapchainImageFormat(VkPhysicalDevice physicalDevice, VkSurfaceKHR presentationSurface,
+                                VkSurfaceFormatKHR desiredSurfaceFormat, VkFormat &imageFormat, VkColorSpaceKHR &imageColorSpace)
+{
+  uint32_t formatsCount = 0;
+  VkResult result = VK_SUCCESS;
+
+  result = vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, presentationSurface, &formatsCount, nullptr);
+  if((result != VK_SUCCESS) || (formatsCount == 0))
+  {
+    std::cerr << "Could not get the number of supported surface formats." << std::endl;
+    return false;
+  }
+
+  std::vector<VkSurfaceFormatKHR> surfaceFormats(formatsCount);
+  result = vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, presentationSurface, &formatsCount, surfaceFormats.data());
+  if((result != VK_SUCCESS) || (formatsCount == 0))
+  {
+    std::cerr << "Could not enumerate supported surface formats." << std::endl;
+    return false;
+  }
+
+  if((surfaceFormats.size() == 1) && (surfaceFormats[0].format == VK_FORMAT_UNDEFINED))
+  {
+    imageFormat = desiredSurfaceFormat.format;
+    imageColorSpace = desiredSurfaceFormat.colorSpace;
+    return true;
+  }
+
+  for(auto &surfaceFormat : surfaceFormats)
+  {
+    if((desiredSurfaceFormat.format == surfaceFormat.format) && (desiredSurfaceFormat.colorSpace == surfaceFormat.colorSpace))
+    {
+      imageFormat = desiredSurfaceFormat.format;
+      imageColorSpace = desiredSurfaceFormat.colorSpace;
+      return true;
+    }
+  }
+
+  for(auto &surfaceFormat : surfaceFormats)
+  {
+    if((desiredSurfaceFormat.format == surfaceFormat.format))
+    {
+      imageFormat = desiredSurfaceFormat.format;
+      imageColorSpace = surfaceFormat.colorSpace;
+      std::cout << "Desired combination of format and colorspace is not supported. Selecting other colorspace." << std::endl;
+      return true;
+    }
+  }
+
+  imageFormat = surfaceFormats[0].format;
+  imageColorSpace = surfaceFormats[0].colorSpace;
+  std::cout << "Desired format is not supported. Selecting available format - colorspace combination." << std::endl;
+  return true;
+}
+
+bool createSwapchain(VkPhysicalDevice physicalDevice, VkSurfaceKHR presentationSurface, VkDevice logicalDevice,
+                      VkPresentModeKHR desiredMode, VkSurfaceFormatKHR desiredSurfaceFormat,
+                      VkSurfaceTransformFlagBitsKHR desiredTransform, VkImageUsageFlags swapchainImageUsage,
+                      VkExtent2D &imageSize, VkFormat &imageFormat, VkSwapchainKHR &oldSwapchain, VkSwapchainKHR &swapchain, 
+                      std::vector<VkImage> &swapchainImages)
+{
+  VkPresentModeKHR presentMode;
+  if (!selectPresentationMode(physicalDevice, presentationSurface, desiredMode, presentMode))
+    return false;
+
+  VkSurfaceCapabilitiesKHR surfaceCapabilities;
+  VkResult result = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, presentationSurface, &surfaceCapabilities);
+  if(result != VK_SUCCESS)
+  {
+    std::cerr << "Could not get the capabilities of a presentation surface." << std::endl;
+    return false;
+  }
+
+  uint32_t imagesNumber = surfaceCapabilities.minImageCount + 1;
+  if((surfaceCapabilities.maxImageCount > 0) && (imagesNumber > surfaceCapabilities.maxImageCount))
+    imagesNumber = surfaceCapabilities.maxImageCount;
+
+  if(surfaceCapabilities.currentExtent.width == 0xFFFFFFFF)
+  {
+    imageSize = {640, 480};
+
+    if(imageSize.width < surfaceCapabilities.minImageExtent.width)
+      imageSize.width = surfaceCapabilities.minImageExtent.width;
+    else if(imageSize.width > surfaceCapabilities.maxImageExtent.width)
+      imageSize.width = surfaceCapabilities.maxImageExtent.width;
+
+    if(imageSize.height < surfaceCapabilities.minImageExtent.height)
+      imageSize.height = surfaceCapabilities.minImageExtent.height;
+    else if(imageSize.height > surfaceCapabilities.maxImageExtent.height)
+      imageSize.height = surfaceCapabilities.maxImageExtent.height;
+  }
+  else
+  {
+    imageSize = surfaceCapabilities.currentExtent;
+  }
+
+  if((imageSize.width == 0) || (imageSize.height == 0))
+    return true;
+
+  VkImageUsageFlags imageUsage = swapchainImageUsage & surfaceCapabilities.supportedUsageFlags;
+  if(swapchainImageUsage != imageUsage)
+  {
+    std::cerr << "Surface doesn`t support such image usage flags." << std::endl;
+    return false;
+  }
+
+  VkSurfaceTransformFlagBitsKHR surfaceTransform;
+  if(surfaceCapabilities.supportedTransforms & desiredTransform)
+    surfaceTransform = desiredTransform;
+  else
+    surfaceTransform = surfaceCapabilities.currentTransform;
+
+  VkColorSpaceKHR imageColorSpace;
+  if(!selectSwapchainImageFormat(physicalDevice, presentationSurface, desiredSurfaceFormat, imageFormat, imageColorSpace))
+    return false;
+
+  VkSurfaceFormatKHR surfaceFormat = {imageFormat, imageColorSpace};
+  VkSwapchainCreateInfoKHR swapchainCreateInfo = {
+    VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,  // VkStructureType                  sType
+    nullptr,                                      // const void                     * pNext
+    0,                                            // VkSwapchainCreateFlagsKHR        flags
+    presentationSurface,                          // VkSurfaceKHR                     surface
+    imagesNumber,                                 // uint32_t                         minImageCount
+    surfaceFormat.format,                         // VkFormat                         imageFormat
+    surfaceFormat.colorSpace,                     // VkColorSpaceKHR                  imageColorSpace
+    imageSize,                                    // VkExtent2D                       imageExtent
+    1,                                            // uint32_t                         imageArrayLayers
+    imageUsage,                                   // VkImageUsageFlags                imageUsage
+    VK_SHARING_MODE_EXCLUSIVE,                    // VkSharingMode                    imageSharingMode
+    0,                                            // uint32_t                         queueFamilyIndexCount
+    nullptr,                                      // const uint32_t                 * pQueueFamilyIndices
+    surfaceTransform,                             // VkSurfaceTransformFlagBitsKHR    preTransform
+    VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,            // VkCompositeAlphaFlagBitsKHR      compositeAlpha
+    presentMode,                                  // VkPresentModeKHR                 presentMode
+    VK_TRUE,                                      // VkBool32                         clipped
+    oldSwapchain                                  // VkSwapchainKHR                   oldSwapchain
+  };
+
+  result = vkCreateSwapchainKHR(logicalDevice, &swapchainCreateInfo, nullptr, &swapchain);
+  if((result != VK_SUCCESS) || (swapchain == VK_NULL_HANDLE))
+  {
+    std::cerr << "Could not create a swapchain." << std::endl;
+    return false;
+  }
+
+  if(oldSwapchain != VK_NULL_HANDLE)
+  {
+    vkDestroySwapchainKHR(logicalDevice, oldSwapchain, nullptr);
+    oldSwapchain = VK_NULL_HANDLE;
+  }
+
+  uint32_t imagesCount = 0;
+  result = VK_SUCCESS;
+
+  result = vkGetSwapchainImagesKHR(logicalDevice, swapchain, &imagesCount, nullptr);
+  if( (result != VK_SUCCESS) || (imagesCount == 0))
+  {
+    std::cerr << "Could not get the number of swapchain images." << std::endl;
+    return false;
+  }
+
+  swapchainImages.resize(imagesCount);
+  result = vkGetSwapchainImagesKHR(logicalDevice, swapchain, &imagesCount, swapchainImages.data());
+  if((result != VK_SUCCESS) || (imagesCount == 0))
+  {
+    std::cerr << "Could not enumerate swapchain images." << std::endl;
+    return false;
+  }
+
   return true;
 }
 
